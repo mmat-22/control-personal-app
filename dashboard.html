@@ -52,97 +52,136 @@ canvas{background:white;border-radius:15px;padding:10px;}
 </div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbzekVMi8lJn-ZttNiDcwel0GmyEOi0iCZ2ZVDnkGBVngvgSOY32Q7zrNABMt4kkTfza/exec?accion=gastos";
+
+const URL = "PEGA_ACA_TU_URL_DE_APPS_SCRIPT";
 
 let grafico = null;
 
 async function cargarDatos(){
-  const res = await fetch(URL + "&t=" + new Date().getTime(), {
-    cache: "no-store"
-  });
 
-  const data = await res.json();
-
-  const gastos = data.gastos || [];
-  const ingresos = data.ingresos || [];
-
-  let totalGastos = 0;
-  let totalIngresos = 0;
-  const lista = [];
-
-  for(let i=1; i<gastos.length; i++){
-    const fila = gastos[i];
-    if(!fila || fila.length < 5) continue;
-
-    const fecha = fila[0];
-    const descripcion = fila[3];
-    const monto = Number(fila[4]) || 0;
-
-    totalGastos += monto;
-
-    lista.push({
-      tipo:"Gasto",
-      fecha,
-      descripcion,
-      monto
+    const res = await fetch(URL + "&t=" + new Date().getTime(), {
+        cache: "no-store"
     });
-  }
 
-  for(let i=1; i<ingresos.length; i++){
-    const fila = ingresos[i];
-    if(!fila || fila.length < 5) continue;
+    const data = await res.json();
 
-    const fecha = fila[0];
-    const descripcion = fila[3];
-    const monto = Number(fila[4]) || 0;
+    const gastos = data.gastos;
+    const ingresos = data.ingresos;
 
-    totalIngresos += monto;
+    let totalGastos = 0;
+    let totalIngresos = 0;
 
-    lista.push({
-      tipo:"Ingreso",
-      fecha,
-      descripcion,
-      monto
-    });
-  }
+    const lista = [];
 
-  document.getElementById("totalIngresos").textContent = "$" + totalIngresos.toLocaleString("es-AR");
-  document.getElementById("totalGastos").textContent = "$" + totalGastos.toLocaleString("es-AR");
-  document.getElementById("saldo").textContent = "$" + (totalIngresos - totalGastos).toLocaleString("es-AR");
+    // GASTOS
+    for(let i = 1; i < gastos.length; i++){
 
-  const movimientos = document.getElementById("movimientos");
-  movimientos.innerHTML = "";
+        const fila = gastos[i];
 
-  lista.reverse();
+        if(!fila || fila.length < 5) continue;
 
-  lista.slice(0,15).forEach(m => {
-    movimientos.innerHTML += `
-      <div class="movimiento">
-        <div><b>${m.descripcion}</b></div>
-        <div>${m.tipo}</div>
-        <div>$${m.monto.toLocaleString("es-AR")}</div>
-        <div class="fecha">${m.fecha}</div>
-      </div>
-    `;
-  });
+        const fecha = fila[0];
+        const descripcion = fila[3];
+        const monto = Number(fila[4]) || 0;
 
-  if(grafico){
-    grafico.destroy();
-  }
+        totalGastos += monto;
 
-  grafico = new Chart(document.getElementById("grafico"),{
-    type:"doughnut",
-    data:{
-      labels:["Gastos","Ingresos"],
-      datasets:[{
-        data:[totalGastos,totalIngresos]
-      }]
+        lista.push({
+            tipo: "Gasto",
+            fecha,
+            descripcion,
+            monto
+        });
     }
-  });
+
+    // INGRESOS
+    for(let i = 1; i < ingresos.length; i++){
+
+        const fila = ingresos[i];
+
+        if(!fila || fila.length < 5) continue;
+
+        const fecha = fila[0];
+        const descripcion = fila[3];
+        const monto = Number(fila[4]) || 0;
+
+        totalIngresos += monto;
+
+        lista.push({
+            tipo: "Ingreso",
+            fecha,
+            descripcion,
+            monto
+        });
+    }
+
+    // TOTALES
+    document.getElementById("ingresos").innerText =
+        "$" + totalIngresos.toLocaleString("es-AR");
+
+    document.getElementById("gastos").innerText =
+        "$" + totalGastos.toLocaleString("es-AR");
+
+    document.getElementById("saldo").innerText =
+        "$" + (totalIngresos - totalGastos).toLocaleString("es-AR");
+
+    // ORDENAR POR FECHA
+    function convertirFecha(fecha){
+
+        const f = new Date(fecha);
+
+        if(isNaN(f)){
+            return new Date(0);
+        }
+
+        return f;
+    }
+
+    lista.sort((a, b) =>
+        convertirFecha(b.fecha) - convertirFecha(a.fecha)
+    );
+
+    // MOVIMIENTOS
+    const movimientos = document.getElementById("movimientos");
+
+    movimientos.innerHTML = "";
+
+    lista.slice(0,15).forEach(m => {
+
+        movimientos.innerHTML += `
+            <div class="movimiento">
+                <strong>${m.descripcion}</strong><br>
+                ${m.tipo}<br>
+                $${m.monto.toLocaleString("es-AR")}<br>
+                <small>${m.fecha}</small>
+            </div>
+            <hr>
+        `;
+    });
+
+    // GRAFICO
+    if(grafico){
+        grafico.destroy();
+    }
+
+    grafico = new Chart(document.getElementById("grafico"),{
+        type:"doughnut",
+        data:{
+            labels:["Gastos","Ingresos"],
+            datasets:[{
+                data:[totalGastos,totalIngresos]
+            }]
+        }
+    });
+
 }
 
+// CARGA INICIAL
 cargarDatos();
+
+// ACTUALIZAR CADA 30 SEGUNDOS
 setInterval(cargarDatos, 30000);
+
 </script>
 
 </body>
