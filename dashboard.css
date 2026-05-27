@@ -197,3 +197,17 @@ body{
     grid-template-columns:repeat(3,1fr);
   }
 }
+.mov-derecha{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn-borrar{
+  border:none;
+  background:#f1f3f6;
+  color:#d50000;
+  border-radius:10px;
+  padding:7px 9px;
+  font-size:16px;
+}
