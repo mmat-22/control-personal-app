@@ -1,0 +1,141 @@
+*{
+  box-sizing:border-box;
+}
+
+body{
+  font-family:Arial, sans-serif;
+  margin:0;
+  background:#f2f4f7;
+  color:#111;
+}
+
+.app{
+  max-width:520px;
+  margin:0 auto;
+  padding:16px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.header h1{
+  color:#0d47a1;
+  margin-bottom:6px;
+}
+
+.header p{
+  margin:0;
+  color:#666;
+  font-size:14px;
+}
+
+.boton{
+  display:block;
+  width:100%;
+  background:#0d47a1;
+  color:white;
+  text-align:center;
+  padding:15px;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.resumen{
+  display:grid;
+  gap:12px;
+}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 3px 14px rgba(0,0,0,0.08);
+}
+
+.card span{
+  display:block;
+  color:#555;
+  font-size:14px;
+}
+
+.valor{
+  display:block;
+  font-size:30px;
+  margin-top:8px;
+}
+
+.ingresos{
+  color:#087f23;
+}
+
+.gastos{
+  color:#d50000;
+}
+
+.saldo{
+  color:#0d47a1;
+}
+
+.grafico-contenedor{
+  height:260px;
+}
+
+.titulo-linea{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.titulo-linea h2{
+  margin:0;
+  font-size:20px;
+}
+
+.titulo-linea small{
+  color:#777;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.movimiento{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid #e0e0e0;
+}
+
+.movimiento:last-child{
+  border-bottom:none;
+}
+
+.movimiento strong{
+  display:block;
+  font-size:16px;
+  margin-bottom:4px;
+}
+
+.movimiento span{
+  color:#777;
+  font-size:13px;
+}
+
+.mov-ingreso{
+  color:#087f23;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.mov-gasto{
+  color:#d50000;
+  font-weight:bold;
+  white-space:nowrap;
+}
