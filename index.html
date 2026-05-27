@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control Personal</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <h1>Control Personal</h1>
+
+        <label for="tipo">Tipo</label>
+        <select id="tipo">
+            <option value="Gasto">Gasto</option>
+            <option value="Ingreso">Ingreso</option>
+        </select>
+
+        <label for="categoria">Categoría</label>
+        <select id="categoria">
+            <option value="Supermercado">Supermercado</option>
+            <option value="Comida">Comida</option>
+            <option value="Servicios">Servicios</option>
+            <option value="Auto">Auto</option>
+            <option value="Salud">Salud</option>
+            <option value="Ocio">Ocio</option>
+            <option value="Sueldo">Sueldo</option>
+            <option value="Otros">Otros</option>
+        </select>
+
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" placeholder="Ej: compra en supermercado">
+
+        <label for="monto">Monto</label>
+        <input type="number" id="monto" placeholder="Ej: 10000">
+
+        <button id="btnGuardar">Guardar</button>
+        <button onclick="window.location.href='dashboard.html'">
+📊 Ver Dashboard
+</button>
+
+        <p id="mensaje"></p>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

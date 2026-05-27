@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Gastos</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{font-family:Arial;margin:0;padding:15px;background:#f2f2f2;}
+h1{text-align:center;color:#0d47a1;}
+.card{background:white;border-radius:15px;padding:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+.valor{font-size:28px;font-weight:bold;margin-top:10px;}
+.ingresos{color:green;}
+.gastos{color:red;}
+.saldo{color:#0d47a1;}
+.movimiento{border-bottom:1px solid #ddd;padding:10px 0;}
+.fecha{color:gray;font-size:12px;}
+canvas{background:white;border-radius:15px;padding:10px;}
+.boton{display:block;width:100%;background:#0d47a1;color:white;text-align:center;padding:15px;border-radius:12px;text-decoration:none;font-weight:bold;margin-bottom:15px;box-sizing:border-box;}
+</style>
+</head>
+
+<body>
+
+<h1>💰 Mis Finanzas</h1>
+
+<a class="boton" href="index.html">➕ Agregar Movimiento</a>
+
+<div class="card">
+  <div>Ingresos</div>
+  <div class="valor ingresos" id="totalIngresos">$0</div>
+</div>
+
+<div class="card">
+  <div>Gastos</div>
+  <div class="valor gastos" id="totalGastos">$0</div>
+</div>
+
+<div class="card">
+  <div>Saldo</div>
+  <div class="valor saldo" id="saldo">$0</div>
+</div>
+
+<div class="card">
+  <canvas id="grafico"></canvas>
+</div>
+
+<div class="card">
+  <h3>Últimos movimientos</h3>
+  <div id="movimientos"></div>
+</div>
+
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbzekVMi8lJn-ZttNiDcwel0GmyEOi0iCZ2ZVDnkGBVngvgSOY32Q7zrNABMt4kkTfza/exec?accion=gastos";
+
+let grafico = null;
+
+async function cargarDatos(){
+  const res = await fetch(URL + "&t=" + new Date().getTime(), {
+    cache: "no-store"
+  });
+
+  const data = await res.json();
+
+  const gastos = data.gastos || [];
+  const ingresos = data.ingresos || [];
+
+  let totalGastos = 0;
+  let totalIngresos = 0;
+  const lista = [];
+
+  for(let i=1; i<gastos.length; i++){
+    const fila = gastos[i];
+    if(!fila || fila.length < 5) continue;
+
+    const fecha = fila[0];
+    const descripcion = fila[3];
+    const monto = Number(fila[4]) || 0;
+
+    totalGastos += monto;
+
+    lista.push({
+      tipo:"Gasto",
+      fecha,
+      descripcion,
+      monto
+    });
+  }
+
+  for(let i=1; i<ingresos.length; i++){
+    const fila = ingresos[i];
+    if(!fila || fila.length < 5) continue;
+
+    const fecha = fila[0];
+    const descripcion = fila[3];
+    const monto = Number(fila[4]) || 0;
+
+    totalIngresos += monto;
+
+    lista.push({
+      tipo:"Ingreso",
+      fecha,
+      descripcion,
+      monto
+    });
+  }
+
+  document.getElementById("totalIngresos").textContent = "$" + totalIngresos.toLocaleString("es-AR");
+  document.getElementById("totalGastos").textContent = "$" + totalGastos.toLocaleString("es-AR");
+  document.getElementById("saldo").textContent = "$" + (totalIngresos - totalGastos).toLocaleString("es-AR");
+
+  const movimientos = document.getElementById("movimientos");
+  movimientos.innerHTML = "";
+
+  lista.reverse();
+
+  lista.slice(0,15).forEach(m => {
+    movimientos.innerHTML += `
+      <div class="movimiento">
+        <div><b>${m.descripcion}</b></div>
+        <div>${m.tipo}</div>
+        <div>$${m.monto.toLocaleString("es-AR")}</div>
+        <div class="fecha">${m.fecha}</div>
+      </div>
+    `;
+  });
+
+  if(grafico){
+    grafico.destroy();
+  }
+
+  grafico = new Chart(document.getElementById("grafico"),{
+    type:"doughnut",
+    data:{
+      labels:["Gastos","Ingresos"],
+      datasets:[{
+        data:[totalGastos,totalIngresos]
+      }]
+    }
+  });
+}
+
+cargarDatos();
+</script>
+
+</body>
+</html>
