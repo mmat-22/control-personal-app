@@ -3,64 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Gastos</title>
-  <link rel="stylesheet" href="dashboard.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Mis Finanzas</title>
+
   <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-512.png">
-<meta name="theme-color" content="#0d47a1">
+  <link rel="icon" href="icon-512.png">
+  <link rel="stylesheet" href="dashboard.css">
+  <meta name="theme-color" content="#0d47a1">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-  <main class="app">
+<main class="app">
 
-    <header class="header">
-      <h1>💰 Mis Finanzas</h1>
-      <p>Resumen actualizado de ingresos, gastos y saldo.</p>
-    </header>
-
-    <a class="boton" href="index.html">➕ Agregar Movimiento</a>
-
-    <section class="resumen">
-      <div class="card">
-        <span>Ingresos</span>
-        <strong class="valor ingresos" id="totalIngresos">$0</strong>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon-512.png" alt="Mis Finanzas">
+      <div>
+        <h1>Mis Finanzas</h1>
+        <p>Dashboard personal</p>
       </div>
+    </div>
 
-      <div class="card">
-        <span>Gastos</span>
-        <strong class="valor gastos" id="totalGastos">$0</strong>
-      </div>
+    <a class="menu-btn" href="index.html">+</a>
+  </header>
 
-      <div class="card">
-        <span>Saldo</span>
-        <strong class="valor saldo" id="saldo">$0</strong>
-      </div>
-    </section>
+  <section class="toolbar">
+    <label for="filtroMes">Mes</label>
+    <select id="filtroMes"></select>
+    <small id="ultimaActualizacion">Actualizando...</small>
+  </section>
 
-    <section class="card">
-      <h2>Distribución</h2>
-      <div class="grafico-contenedor">
-        <canvas id="grafico"></canvas>
-      </div>
-    </section>
+  <section class="resumen-grid">
+    <article class="metric-card">
+      <span>Ingresos</span>
+      <strong class="ingresos" id="totalIngresos">$0</strong>
+    </article>
 
-    <section class="card">
-      <div class="titulo-linea">
-        <h2>Últimos movimientos</h2>
-        <small id="ultimaActualizacion">Actualizando...</small>
-      </div>
+    <article class="metric-card">
+      <span>Gastos</span>
+      <strong class="gastos" id="totalGastos">$0</strong>
+    </article>
 
-      <div id="movimientos"></div>
-    </section>
+    <article class="metric-card">
+      <span>Saldo</span>
+      <strong class="saldo" id="saldo">$0</strong>
+    </article>
+  </section>
 
-  </main>
+  <section class="card">
+    <h2>Distribución mensual</h2>
+    <div class="grafico-contenedor">
+      <canvas id="grafico"></canvas>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Últimos movimientos</h2>
+    <div id="movimientos"></div>
+  </section>
+
+</main>
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbzekVMi8lJn-ZttNiDcwel0GmyEOi0iCZ2ZVDnkGBVngvgSOY32Q7zrNABMt4kkTfza/exec?accion=gastos";
 
 let grafico = null;
+let todosLosMovimientos = [];
 
 function formatearPesos(valor){
   return "$" + Number(valor || 0).toLocaleString("es-AR", {
@@ -71,102 +81,115 @@ function formatearPesos(valor){
 
 function convertirFecha(fecha){
   const f = new Date(fecha);
-  return isNaN(f) ? new Date(0) : f;
-}
+  if(!isNaN(f)) return f;
 
-function formatearFecha(fecha){
-  const f = new Date(fecha);
+  const meses = {
+    enero:0, febrero:1, marzo:2, abril:3, mayo:4, junio:5,
+    julio:6, agosto:7, septiembre:8, octubre:9, noviembre:10, diciembre:11
+  };
 
-  if(isNaN(f)){
-    return fecha || "";
+  const texto = String(fecha || "").toLowerCase();
+  const match = texto.match(/(\d{1,2}) de ([a-záéíóúñ]+) de (\d{4})/);
+
+  if(match){
+    return new Date(Number(match[3]), meses[match[2]], Number(match[1]));
   }
 
-  return f.toLocaleString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
+  return new Date(0);
+}
+
+function claveMes(fecha){
+  const f = convertirFecha(fecha);
+  if(isNaN(f)) return "";
+  return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2,"0")}`;
+}
+
+function nombreMes(clave){
+  const [anio, mes] = clave.split("-");
+  const fecha = new Date(Number(anio), Number(mes) - 1, 1);
+
+  return fecha.toLocaleDateString("es-AR", {
+    month:"long",
+    year:"numeric"
   });
 }
 
-async function cargarDatos(){
+function formatearFecha(fecha){
+  const f = convertirFecha(fecha);
 
-  try{
-    const res = await fetch(URL + "&t=" + new Date().getTime(), {
-      cache: "no-store"
-    });
+  if(isNaN(f) || f.getFullYear() < 2000){
+    return fecha || "";
+  }
 
-    const data = await res.json();
+  return f.toLocaleDateString("es-AR", {
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric"
+  });
+}
 
-    const gastos = data.gastos || [];
-    const ingresos = data.ingresos || [];
+function cargarFiltroMeses(){
+  const select = document.getElementById("filtroMes");
 
-    let totalGastos = 0;
-    let totalIngresos = 0;
+  const meses = [...new Set(
+    todosLosMovimientos
+      .map(m => claveMes(m.fecha))
+      .filter(Boolean)
+  )].sort().reverse();
 
-    const lista = [];
+  const valorActual = select.value;
 
-    for(let i = 1; i < gastos.length; i++){
-      const fila = gastos[i];
-      if(!fila || fila.length < 5) continue;
+  select.innerHTML = "";
 
-      const fecha = fila[0];
-      const categoria = fila[2] || "Gasto";
-      const descripcion = fila[3] || "Sin descripción";
-      const monto = Number(fila[4]) || 0;
+  meses.forEach(mes => {
+    const option = document.createElement("option");
+    option.value = mes;
+    option.textContent = nombreMes(mes);
+    select.appendChild(option);
+  });
 
-      if(monto <= 0) continue;
+  if(valorActual && meses.includes(valorActual)){
+    select.value = valorActual;
+  } else if(meses.length > 0) {
+    select.value = meses[0];
+  }
+}
 
-      totalGastos += monto;
+function renderDashboard(){
+  const mesSeleccionado = document.getElementById("filtroMes").value;
 
-      lista.push({
-        tipo: "Gasto",
-        categoria,
-        fecha,
-        descripcion,
-        monto
-      });
+  const movimientosMes = todosLosMovimientos.filter(m =>
+    claveMes(m.fecha) === mesSeleccionado
+  );
+
+  let totalGastos = 0;
+  let totalIngresos = 0;
+
+  movimientosMes.forEach(m => {
+    if(m.tipo === "Ingreso"){
+      totalIngresos += m.monto;
+    } else {
+      totalGastos += m.monto;
     }
+  });
 
-    for(let i = 1; i < ingresos.length; i++){
-      const fila = ingresos[i];
-      if(!fila || fila.length < 5) continue;
+  document.getElementById("totalIngresos").textContent = formatearPesos(totalIngresos);
+  document.getElementById("totalGastos").textContent = formatearPesos(totalGastos);
+  document.getElementById("saldo").textContent = formatearPesos(totalIngresos - totalGastos);
 
-      const fecha = fila[0];
-      const categoria = fila[2] || "Ingreso";
-      const descripcion = fila[3] || "Sin descripción";
-      const monto = Number(fila[4]) || 0;
+  const movimientos = document.getElementById("movimientos");
+  movimientos.innerHTML = "";
 
-      if(monto <= 0) continue;
-
-      totalIngresos += monto;
-
-      lista.push({
-        tipo: "Ingreso",
-        categoria,
-        fecha,
-        descripcion,
-        monto
-      });
-    }
-
-    document.getElementById("totalIngresos").textContent = formatearPesos(totalIngresos);
-    document.getElementById("totalGastos").textContent = formatearPesos(totalGastos);
-    document.getElementById("saldo").textContent = formatearPesos(totalIngresos - totalGastos);
-
-    lista.sort((a, b) => convertirFecha(b.fecha) - convertirFecha(a.fecha));
-
-    const movimientos = document.getElementById("movimientos");
-    movimientos.innerHTML = "";
-
-    lista.slice(0, 20).forEach(m => {
+  movimientosMes
+    .sort((a,b) => convertirFecha(b.fecha) - convertirFecha(a.fecha))
+    .slice(0,25)
+    .forEach(m => {
       const clase = m.tipo === "Ingreso" ? "mov-ingreso" : "mov-gasto";
       const signo = m.tipo === "Ingreso" ? "+" : "-";
 
       movimientos.innerHTML += `
         <article class="movimiento">
-          <div>
+          <div class="mov-info">
             <strong>${m.descripcion}</strong>
             <span>${m.categoria} · ${formatearFecha(m.fecha)}</span>
           </div>
@@ -177,42 +200,95 @@ async function cargarDatos(){
       `;
     });
 
-    if(grafico){
-      grafico.destroy();
+  if(grafico){
+    grafico.destroy();
+  }
+
+  grafico = new Chart(document.getElementById("grafico"),{
+    type:"doughnut",
+    data:{
+      labels:["Gastos","Ingresos"],
+      datasets:[{
+        data:[totalGastos,totalIngresos]
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          position:"bottom"
+        }
+      }
+    }
+  });
+}
+
+async function cargarDatos(){
+  try{
+    const res = await fetch(URL + "&t=" + new Date().getTime(), {
+      cache:"no-store"
+    });
+
+    const data = await res.json();
+
+    const gastos = data.gastos || [];
+    const ingresos = data.ingresos || [];
+
+    todosLosMovimientos = [];
+
+    for(let i=1; i<gastos.length; i++){
+      const fila = gastos[i];
+      if(!fila || fila.length < 5) continue;
+
+      const monto = Number(fila[4]) || 0;
+      if(monto <= 0) continue;
+
+      todosLosMovimientos.push({
+        tipo:"Gasto",
+        fecha:fila[0],
+        categoria:fila[2] || "Gasto",
+        descripcion:fila[3] || "Sin descripción",
+        monto
+      });
     }
 
-    grafico = new Chart(document.getElementById("grafico"),{
-      type: "doughnut",
-      data: {
-        labels: ["Gastos", "Ingresos"],
-        datasets: [{
-          data: [totalGastos, totalIngresos]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
+    for(let i=1; i<ingresos.length; i++){
+      const fila = ingresos[i];
+      if(!fila || fila.length < 5) continue;
+
+      const monto = Number(fila[4]) || 0;
+      if(monto <= 0) continue;
+
+      todosLosMovimientos.push({
+        tipo:"Ingreso",
+        fecha:fila[0],
+        categoria:fila[2] || "Ingreso",
+        descripcion:fila[3] || "Sin descripción",
+        monto
+      });
+    }
+
+    cargarFiltroMeses();
+    renderDashboard();
 
     document.getElementById("ultimaActualizacion").textContent =
       "Actualizado " + new Date().toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit"
+        hour:"2-digit",
+        minute:"2-digit"
       });
 
   }catch(error){
-    document.getElementById("ultimaActualizacion").textContent =
-      "Error al actualizar";
+    document.getElementById("ultimaActualizacion").textContent = "Error al actualizar";
     console.error(error);
   }
 }
 
+document.getElementById("filtroMes").addEventListener("change", renderDashboard);
+
 cargarDatos();
 setInterval(cargarDatos, 30000);
-</script>
 
-<script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
