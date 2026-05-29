@@ -123,7 +123,16 @@ function convertirFecha(fecha){
 
   return new Date(0);
 }
+function claveMes(fecha){
 
+  const f = convertirFecha(fecha);
+
+  if(isNaN(f) || f.getFullYear() < 2000){
+    return "";
+  }
+
+  return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2,"0")}`;
+}
 function nombreMes(clave){
 
 const [anio,mes] = clave.split("-");
