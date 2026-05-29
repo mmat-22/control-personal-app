@@ -101,20 +101,27 @@ return "$" + Number(valor || 0).toLocaleString("es-AR");
 
 function convertirFecha(fecha){
 
-const f = new Date(fecha);
+  if(fecha instanceof Date){
+    return fecha;
+  }
 
-if(!isNaN(f)) return f;
+  const f = new Date(fecha);
+  if(!isNaN(f)) return f;
 
-return new Date(0);
+  const meses = {
+    enero:0, febrero:1, marzo:2, abril:3, mayo:4, junio:5,
+    julio:6, agosto:7, septiembre:8, octubre:9, noviembre:10, diciembre:11
+  };
 
-}
+  const texto = String(fecha || "").toLowerCase().trim();
 
-function claveMes(fecha){
+  const match = texto.match(/(\d{1,2})\s+de\s+([a-záéíóúñ]+)\s+de\s+(\d{4})/);
 
-const f = convertirFecha(fecha);
+  if(match){
+    return new Date(Number(match[3]), meses[match[2]], Number(match[1]), 12, 0, 0);
+  }
 
-return `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,"0")}`;
-
+  return new Date(0);
 }
 
 function nombreMes(clave){

@@ -211,3 +211,55 @@ body{
   padding:7px 9px;
   font-size:16px;
 }
+.movimiento{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:13px 0;
+  border-bottom:1px solid #e6e9ef;
+  overflow:hidden;
+}
+
+.mov-info{
+  min-width:0;
+}
+
+.mov-info strong{
+  display:block;
+  font-size:16px;
+  margin-bottom:4px;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+
+.mov-info span{
+  color:#6f7785;
+  font-size:13px;
+  word-break:break-word;
+}
+
+.mov-derecha{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  max-width:145px;
+}
+
+.mov-ingreso,
+.mov-gasto{
+  font-weight:bold;
+  white-space:nowrap;
+  font-size:15px;
+  text-align:right;
+}
+
+.btn-borrar{
+  border:none;
+  background:#f1f3f6;
+  color:#d50000;
+  border-radius:10px;
+  padding:7px 9px;
+  font-size:15px;
+  flex-shrink:0;
+}
