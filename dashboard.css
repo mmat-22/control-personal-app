@@ -7,12 +7,15 @@ body{
   font-family:Arial, sans-serif;
   background:#eef2f7;
   color:#10213f;
+  overflow-x:hidden;
 }
 
 .app{
+  width:100%;
   max-width:540px;
   margin:0 auto;
   padding:14px;
+  overflow-x:hidden;
 }
 
 .topbar{
@@ -31,6 +34,7 @@ body{
   display:flex;
   align-items:center;
   gap:12px;
+  min-width:0;
 }
 
 .brand img{
@@ -39,11 +43,13 @@ body{
   border-radius:16px;
   object-fit:cover;
   background:white;
+  flex-shrink:0;
 }
 
 .brand h1{
   margin:0;
   font-size:24px;
+  white-space:nowrap;
 }
 
 .brand p{
@@ -66,6 +72,7 @@ body{
   text-decoration:none;
   font-size:30px;
   font-weight:bold;
+  flex-shrink:0;
 }
 
 .toolbar{
@@ -113,6 +120,8 @@ body{
   border-radius:20px;
   padding:16px;
   box-shadow:0 4px 16px rgba(0,0,0,0.08);
+  width:100%;
+  overflow:hidden;
 }
 
 .metric-card span{
@@ -150,42 +159,84 @@ body{
 
 .grafico-contenedor{
   height:260px;
+  max-width:100%;
+  overflow:hidden;
+}
+
+canvas{
+  max-width:100%;
 }
 
 .movimiento{
-  display:flex;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:8px;
   align-items:center;
-  gap:12px;
   padding:13px 0;
   border-bottom:1px solid #e6e9ef;
+  width:100%;
+  overflow:hidden;
 }
 
 .movimiento:last-child{
   border-bottom:none;
 }
 
+.mov-info{
+  min-width:0;
+  overflow:hidden;
+}
+
 .mov-info strong{
   display:block;
-  font-size:16px;
+  font-size:15px;
   margin-bottom:4px;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .mov-info span{
+  display:block;
   color:#6f7785;
   font-size:13px;
-}
-
-.mov-ingreso{
-  color:#087f23;
-  font-weight:bold;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
   white-space:nowrap;
 }
 
+.mov-derecha{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  width:auto;
+  max-width:132px;
+  min-width:105px;
+  overflow:hidden;
+}
+
+.mov-ingreso,
 .mov-gasto{
-  color:#d50000;
   font-weight:bold;
   white-space:nowrap;
+  font-size:15px;
+  text-align:right;
+  max-width:88px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.btn-borrar{
+  border:none;
+  background:#f1f3f6;
+  color:#d50000;
+  border-radius:10px;
+  padding:7px 8px;
+  font-size:14px;
+  flex-shrink:0;
 }
 
 @media (min-width:700px){
@@ -196,70 +247,13 @@ body{
   .resumen-grid{
     grid-template-columns:repeat(3,1fr);
   }
-}
-.mov-derecha{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
 
-.btn-borrar{
-  border:none;
-  background:#f1f3f6;
-  color:#d50000;
-  border-radius:10px;
-  padding:7px 9px;
-  font-size:16px;
-}
-.movimiento{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap:10px;
-  align-items:center;
-  padding:13px 0;
-  border-bottom:1px solid #e6e9ef;
-  overflow:hidden;
-}
+  .mov-derecha{
+    max-width:180px;
+  }
 
-.mov-info{
-  min-width:0;
-}
-
-.mov-info strong{
-  display:block;
-  font-size:16px;
-  margin-bottom:4px;
-  word-break:break-word;
-  overflow-wrap:anywhere;
-}
-
-.mov-info span{
-  color:#6f7785;
-  font-size:13px;
-  word-break:break-word;
-}
-
-.mov-derecha{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  max-width:145px;
-}
-
-.mov-ingreso,
-.mov-gasto{
-  font-weight:bold;
-  white-space:nowrap;
-  font-size:15px;
-  text-align:right;
-}
-
-.btn-borrar{
-  border:none;
-  background:#f1f3f6;
-  color:#d50000;
-  border-radius:10px;
-  padding:7px 9px;
-  font-size:15px;
-  flex-shrink:0;
+  .mov-ingreso,
+  .mov-gasto{
+    max-width:130px;
+  }
 }
